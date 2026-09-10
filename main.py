@@ -1,4 +1,3 @@
-# Update main.py to reflect the specific insight text for Graph 1
 main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -43,9 +42,9 @@ st.markdown("""
 st.divider()
 
 # ==========================================
-# 구역 1: [시간 & 영화별] 일관객 변화 추이
+# 구역 1: [시간 & 영화별] 개별 영화 일관객 변화 추이
 # ==========================================
-st.header("📌 구역 1: 영화별 일관객 변화 추이")
+st.header("📌 구역 1: 개별 영화 일관객 변화 추이")
 
 # 영화 목록 추출 (영화명 기준 정렬)
 movie_list = sorted(df['영화명'].unique())
@@ -62,7 +61,7 @@ movie_df = df[df['영화명'] == selected_movie].sort_values('날짜')
 
 if not movie_df.empty:
     # Plotly 선 그래프 생성
-    fig = px.line(
+    fig1 = px.line(
         movie_df,
         x='날짜',
         y='일관객',
@@ -73,10 +72,10 @@ if not movie_df.empty:
     )
 
     # 그래프 스타일 조정 (마우스 호버 시 정확한 정보 표기)
-    fig.update_traces(
+    fig1.update_traces(
         hovertemplate="<b>날짜:</b> %{x|%Y-%m-%d}<br><b>일관객:</b> %{y:,}명<br><b>순위:</b> %{customdata[0]}위<extra></extra>"
     )
-    fig.update_layout(
+    fig1.update_layout(
         xaxis_title="날짜",
         yaxis_title="관객 수 (명)",
         hovermode="x unified",
@@ -84,7 +83,7 @@ if not movie_df.empty:
     )
 
     # Streamlit에 그래프 출력
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True)
 
     # 그래프 아래 설명 문구 추가
     st.info("💡 **이 그래프로 알 수 있는 것:** 주말마다 영화의 관객 수가 늘고 있다는 것을 알 수 있다.")
@@ -95,13 +94,59 @@ else:
 st.divider()
 
 # ==========================================
-# 구역 2: [추가 예정 구역] 
+# 구역 2: [시간 & 상위 TOP 5] 관객 합계 상위 5개 영화 비교
 # ==========================================
-st.header("📌 구역 2: (추후 그래프 추가 구역)")
+st.header("📌 구역 2: 기간 내 일관객 합계 TOP 5 영화 비교")
+
+# 일관객 합계 상위 5개 영화 추출
+top5_movies = df.groupby('영화명')['일관객'].sum().nlargest(5).index.tolist()
+
+# TOP 5 영화 데이터 필터링
+top5_df = df[df['영화명'].isin(top5_movies)].sort_values('날짜')
+
+if not top5_df.empty:
+    # Plotly 다중 선 그래프 생성 (색상으로 영화 구분)
+    fig2 = px.line(
+        top5_df,
+        x='날짜',
+        y='일관객',
+        color='영화명',
+        title="기간 내 일관객 합계 TOP 5 영화의 날짜별 관객 수 비교",
+        labels={'날짜': '날짜', '일관객': '일일 관객 수(명)', '영화명': '영화 제목'},
+        markers=True
+    )
+
+    # 그래프 스타일 및 호버 템플릿 조정
+    fig2.update_traces(
+        hovertemplate="<b>영화명:</b> %{fullData.name}<br><b>날짜:</b> %{x|%Y-%m-%d}<br><b>일관객:</b> %{y:,}명<extra></extra>"
+    )
+    fig2.update_layout(
+        xaxis_title="날짜",
+        yaxis_title="관객 수 (명)",
+        hovermode="x unified",
+        template="plotly_white",
+        legend_title_text="영화 제목 (클릭 시 켜기/끄기)"
+    )
+
+    # Streamlit에 그래프 출력
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # 그래프 하단 분석 결과 / 가이드 영역
+    st.info("💡 **이 그래프로 알 수 있는 것:** (추후 이 그래프로 알 수 있는 점에 대한 분석 문구가 들어갈 자리입니다.)")
+
+else:
+    st.warning("상위 영화 데이터를 불러올 수 없습니다.")
+
+st.divider()
+
+# ==========================================
+# 구역 3: [추가 예정 구역] 
+# ==========================================
+st.header("📌 구역 3: (추후 그래프 추가 구역)")
 st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 그래프가 이곳에 추가될 예정입니다.")
 '''
 
 with open("main.py", "w", encoding="utf-8") as f:
     f.write(main_py_updated)
 
-print("Updated main.py with specific insight text.")
+print("Successfully added graph 2 to main.py.")
