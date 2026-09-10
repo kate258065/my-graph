@@ -1,4 +1,4 @@
-# Update main.py to remove the explanation text area ("이 그래프로 알 수 있는 것")
+# Update main.py to reflect the specific insight text for Graph 1
 main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -86,6 +86,9 @@ if not movie_df.empty:
     # Streamlit에 그래프 출력
     st.plotly_chart(fig, use_container_width=True)
 
+    # 그래프 아래 설명 문구 추가
+    st.info("💡 **이 그래프로 알 수 있는 것:** 주말마다 영화의 관객 수가 늘고 있다는 것을 알 수 있다.")
+
 else:
     st.warning("선택한 영화의 데이터가 존재하지 않습니다.")
 
@@ -101,4 +104,4 @@ st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 �
 with open("main.py", "w", encoding="utf-8") as f:
     f.write(main_py_updated)
 
-print("Updated main.py without '이 그래프로 알 수 있는 것' section.")
+print("Updated main.py with specific insight text.")
