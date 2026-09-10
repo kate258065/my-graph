@@ -1,3 +1,4 @@
+# Update main.py to include Graph 3 (Area chart for daily top 10 audience sum with top 3 peak annotations)
 main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -140,13 +141,78 @@ else:
 st.divider()
 
 # ==========================================
-# 구역 3: [추가 예정 구역] 
+# 구역 3: [시간 & 총 관객수] 날짜별 10위권 일관객 총합 영역 그래프
 # ==========================================
-st.header("📌 구역 3: (추후 그래프 추가 구역)")
+st.header("📌 구역 3: 날짜별 10위권 일관객 총합 추이")
+
+# 날짜별 10위권 일관객 합계 계산
+daily_sum_df = df.groupby('날짜')['일관객'].sum().reset_index().sort_values('날짜')
+
+if not daily_sum_df.empty:
+    # Plotly 영역 그래프 (Area Chart) 생성
+    fig3 = px.area(
+        daily_sum_df,
+        x='날짜',
+        y='일관객',
+        title="날짜별 박스오피스 10위권 일관객 총합 추이",
+        labels={'날짜': '날짜', '일관객': '10위권 관객 총합(명)'}
+    )
+
+    # 합계가 가장 컸던 날 상위 3일 추출
+    top3_days = daily_sum_df.nlargest(3, '일관객')
+
+    # 그래프 상에 TOP 3 peak 지점 어노테이션(표시) 추가
+    for idx, row in top3_days.iterrows():
+        date_str = row['날짜'].strftime('%Y-%m-%d')
+        audience_cnt = row['일관객']
+        
+        fig3.add_annotation(
+            x=row['날짜'],
+            y=audience_cnt,
+            text=f"🏆 TOP {top3_days.index.get_loc(idx)+1}<br>{date_str}<br>({audience_cnt:,}명)",
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=2,
+            arrowcolor="#E74C3C",
+            ax=0,
+            ay=-45,
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="#E74C3C",
+            borderwidth=1.5,
+            borderpad=4
+        )
+
+    # 호버 포맷 및 레이아웃 설정
+    fig3.update_traces(
+        hovertemplate="<b>날짜:</b> %{x|%Y-%m-%d}<br><b>10위권 관객 총합:</b> %{y:,}명<extra></extra>"
+    )
+    fig3.update_layout(
+        xaxis_title="날짜",
+        yaxis_title="관객 총합 (명)",
+        hovermode="x unified",
+        template="plotly_white"
+    )
+
+    # Streamlit에 그래프 출력
+    st.plotly_chart(fig3, use_container_width=True)
+
+    # 그래프 하단 분석 결과 / 가이드 영역
+    st.info("💡 **이 그래프로 알 수 있는 것:** (추후 이 그래프로 알 수 있는 점에 대한 분석 문구가 들어갈 자리입니다.)")
+
+else:
+    st.warning("일관객 총합 데이터를 불러올 수 없습니다.")
+
+st.divider()
+
+# ==========================================
+# 구역 4: [추가 예정 구역] 
+# ==========================================
+st.header("📌 구역 4: (추후 그래프 추가 구역)")
 st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 그래프가 이곳에 추가될 예정입니다.")
 '''
 
 with open("main.py", "w", encoding="utf-8") as f:
     f.write(main_py_updated)
 
-print("Successfully added graph 2 to main.py.")
+print("Successfully added graph 3 to main.py.")
