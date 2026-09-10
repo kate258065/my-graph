@@ -1,10 +1,5 @@
-import os
-
-# Create directory structure
-os.makedirs("streamlit_app", exist_ok=True)
-
-# Write main.py
-main_py_content = '''import streamlit as st
+# Update main.py to remove the explanation text area ("이 그래프로 알 수 있는 것")
+main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
 
@@ -91,9 +86,6 @@ if not movie_df.empty:
     # Streamlit에 그래프 출력
     st.plotly_chart(fig, use_container_width=True)
 
-    # 그래프 하단 분석 결과 / 가이드 영역
-    st.info(f"💡 **이 그래프로 알 수 있는 것:** '{selected_movie}'의 개봉 이후 상영 기간 동안 일별 관객 수가 어떻게 변했는지, 주말/평일 수치 차이 및 흥행 peaks(고점)와 감소 시점을 한눈에 파악할 수 있습니다.")
-
 else:
     st.warning("선택한 영화의 데이터가 존재하지 않습니다.")
 
@@ -104,21 +96,9 @@ st.divider()
 # ==========================================
 st.header("📌 구역 2: (추후 그래프 추가 구역)")
 st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 그래프가 이곳에 추가될 예정입니다.")
-
-# 분석용 placeholder 문구
-st.info("💡 **이 그래프로 알 수 있는 것:** 추후 추가될 시각화 분석 결과 및 요약 문구가 들어갈 자리에입니다.")
 '''
 
 with open("main.py", "w", encoding="utf-8") as f:
-    f.write(main_py_content)
+    f.write(main_py_updated)
 
-# Write requirements.txt
-req_content = '''streamlit
-pandas
-plotly
-'''
-
-with open("requirements.txt", "w", encoding="utf-8") as f:
-    f.write(req_content)
-
-print("Files generated successfully.")
+print("Updated main.py without '이 그래프로 알 수 있는 것' section.")
