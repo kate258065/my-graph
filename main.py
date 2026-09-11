@@ -1,4 +1,4 @@
-# Update main.py to include Graph 4 (Horizontal Bar Chart for Top 10 movies by total audience with days in top 10 on hover)
+# Update main.py to include Graph 5 (Heatmap for Monthly x Weekday Total Audience)
 main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -261,13 +261,77 @@ else:
 st.divider()
 
 # ==========================================
-# 구역 5: [추가 예정 구역] 
+# 구역 5: [월 x 요일] 월x요일별 일관객 합계 히트맵
 # ==========================================
-st.header("📌 구역 5: (추후 그래프 추가 구역)")
+st.header("📌 구역 5: 월×요일별 일관객 합계 히트맵")
+
+# 데이터 카피 후 월 및 요일 파생 변수 생성
+heatmap_df = df.copy()
+heatmap_df['월'] = heatmap_df['날짜'].dt.month.astype(str) + "월"
+heatmap_df['요일_num'] = heatmap_df['날짜'].dt.dayofweek  # 0:월, 1:화 ... 6:일
+
+# 요일 정렬 기준 및 이름 매핑
+weekday_names = {0: '월요일', 1: '화요일', 2: '수요일', 3: '목요일', 4: '금요일', 5: '토요일', 6: '일요일'}
+heatmap_df['요일'] = heatmap_df['요일_num'].map(weekday_names)
+
+# 월 및 요일 순서 보장을 위한 정렬
+month_order = [f"{i}월" for i in range(1, 13)]
+weekday_order = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+
+# 월 x 요일 그룹화 및 관객 합계 계산
+pivot_df = heatmap_df.groupby(['월', '요일', '요일_num'])['일관객'].sum().reset_index()
+
+# 피벗 테이블 생성 (Y축: 월, X축: 요일)
+pivot_table = pivot_df.pivot(index='월', columns='요일', values='일관객')
+
+# 존재하지 않는 월/요일이 있을 경우 대비 및 순서 적용
+existing_months = [m for m in month_order if m in pivot_table.index]
+existing_weekdays = [w for w in weekday_order if w in pivot_table.columns]
+pivot_table = pivot_table.reindex(index=existing_months, columns=existing_weekdays).fillna(0)
+
+if not pivot_table.empty:
+    # Plotly 히트맵 생성 (색이 진할수록 관객이 많음)
+    fig5 = px.imshow(
+        pivot_table,
+        labels=dict(x="요일", y="월", color="일관객 합계(명)"),
+        x=existing_weekdays,
+        y=existing_months,
+        color_continuous_scale="Viridis",
+        title="월×요일별 관객 합계 히트맵 (색상이 진할수록 관객 수 증가)",
+        aspect="auto"
+    )
+
+    # 셀 수치 포맷팅 및 호버 표기 설정
+    fig5.update_traces(
+        hovertemplate="<b>%{y} %{x}</b><br>일관객 합계: %{z:,}명<extra></extra>"
+    )
+
+    fig5.update_layout(
+        xaxis_title="요일",
+        yaxis_title="월",
+        template="plotly_white",
+        height=550
+    )
+
+    # Streamlit에 그래프 출력
+    st.plotly_chart(fig5, use_container_width=True)
+
+    # 그래프 하단 분석 결과 / 가이드 영역
+    st.info("💡 **이 그래프로 알 수 있는 것:** (추후 이 그래프로 알 수 있는 점에 대한 분석 문구가 들어갈 자리입니다.)")
+
+else:
+    st.warning("월×요일별 데이터를 불러올 수 없습니다.")
+
+st.divider()
+
+# ==========================================
+# 구역 6: [추가 예정 구역] 
+# ==========================================
+st.header("📌 구역 6: (추후 그래프 추가 구역)")
 st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 그래프가 이곳에 추가될 예정입니다.")
 '''
 
 with open("main.py", "w", encoding="utf-8") as f:
     f.write(main_py_updated)
 
-print("Successfully added graph 4 to main.py.")
+print("Successfully added graph 5 to main.py.")
