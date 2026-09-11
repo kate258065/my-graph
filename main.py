@@ -1,4 +1,4 @@
-# Update main.py to include Graph 3 (Area chart for daily top 10 audience sum with top 3 peak annotations)
+# Update main.py to include Graph 4 (Horizontal Bar Chart for Top 10 movies by total audience with days in top 10 on hover)
 main_py_updated = '''import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -206,13 +206,68 @@ else:
 st.divider()
 
 # ==========================================
-# 구역 4: [추가 예정 구역] 
+# 구역 4: [총 관객수 & 10위권 진입 일수] TOP 10 영화 가로 막대그래프
 # ==========================================
-st.header("📌 구역 4: (추후 그래프 추가 구역)")
+st.header("📌 구역 4: 기간 내 일관객 총합 TOP 10 영화 순위")
+
+# 영화별 일관객 합계 및 10위권 진입 일수(데이터 등장 횟수) 집계
+top10_summary = df.groupby('영화명').agg(
+    일관객_합계=('일관객', 'sum'),
+    진입일수=('날짜', 'nunique')
+).reset_index()
+
+# 일관객 합계 기준 상위 10개 영화 추출 및 관객 수 적은 순 정렬 (Plotly 가로 막대 그래프는 아래에서 위로 그려지므로 관객 수가 많은 영화가 상단에 배치되도록 함)
+top10_movies_df = top10_summary.nlargest(10, '일관객_합계').sort_values('일관객_합계', ascending=True)
+
+if not top10_movies_df.empty:
+    # Plotly 가로 막대 그래프 생성
+    fig4 = px.bar(
+        top10_movies_df,
+        x='일관객_합계',
+        y='영화명',
+        orientation='h',
+        title="기간 내 일관객 총합 TOP 10 영화",
+        labels={'일관객_합계': '일관객 총합(명)', '영화명': '영화 제목', '진입일수': '10위권 진입 일수'},
+        text='일관객_합계',
+        color='일관객_합계',
+        color_continuous_scale='Blues'
+    )
+
+    # 막대에 텍스트 포맷팅 및 호버 정보 추가
+    fig4.update_traces(
+        texttemplate='%{x:,}명',
+        textposition='outside',
+        customdata=top10_movies_df[['진입일수']],
+        hovertemplate="<b>영화명:</b> %{y}<br><b>일관객 총합:</b> %{x:,}명<br><b>10위권 진입 일수:</b> %{customdata[0]}일<extra></extra>"
+    )
+
+    fig4.update_layout(
+        xaxis_title="일관객 총합 (명)",
+        yaxis_title="영화 제목",
+        template="plotly_white",
+        coloraxis_showscale=False,
+        height=500
+    )
+
+    # Streamlit에 그래프 출력
+    st.plotly_chart(fig4, use_container_width=True)
+
+    # 그래프 하단 분석 결과 / 가이드 영역
+    st.info("💡 **이 그래프로 알 수 있는 것:** (추후 이 그래프로 알 수 있는 점에 대한 분석 문구가 들어갈 자리입니다.)")
+
+else:
+    st.warning("TOP 10 영화 데이터를 불러올 수 없습니다.")
+
+st.divider()
+
+# ==========================================
+# 구역 5: [추가 예정 구역] 
+# ==========================================
+st.header("📌 구역 5: (추후 그래프 추가 구역)")
 st.caption("🚀 앞으로 다양한 시간 기준 데이터 분석 시각화 그래프가 이곳에 추가될 예정입니다.")
 '''
 
 with open("main.py", "w", encoding="utf-8") as f:
     f.write(main_py_updated)
 
-print("Successfully added graph 3 to main.py.")
+print("Successfully added graph 4 to main.py.")
